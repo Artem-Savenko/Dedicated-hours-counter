@@ -1,0 +1,9 @@
+Usage:
+> "Dedicated hours counter.exe" folder_with_entries_path activity
+Example output: You dedicated 140 hours 25 minutes for Learning Python
+
+> "Dedicated hours counter.exe" list_all
+Example output:
+	Learning Python [140h 25m]
+	Creating game 15 [5h]
+	Working out [17h 40m]
