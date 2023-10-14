@@ -3,6 +3,7 @@ import datetime
 import os
 import re
 from pathlib import Path
+from Args import Args
 from Entry import Entry
 
 # Global list that contains all entries
@@ -28,19 +29,14 @@ def sortEntries(sortByDH, sortByCS, reversed):
 # Returns a list of Entries that match 'searchStr'.
 # If exactSearch is True, searchStr is treated like a usual String and must match exactly.
 # If exactSearch is False, searchStr is treated like a Regex pattern and partial search will be perfomed.
-def getFilteredEntries(searchStr, exactSearch=False):
+def getFilteredEntries(searchStr):
     sortedEntries = sortEntries(False, False, False)
 
     filtered = list()
     searchStr = searchStr.lower()  # ignore case during search.
-    if exactSearch:
-        for e in sortedEntries:
-            if searchStr == e.activity.lower():
-                filtered.append(e)
-    else:
-        for e in sortedEntries:
-            if re.search(searchStr, e.activity.lower()):
-                filtered.append(e)
+    for e in sortedEntries:
+        if re.search(searchStr, e.activity.lower()):
+            filtered.append(e)
 
     return filtered
 
@@ -67,8 +63,8 @@ def _summarizeEntries(filteredEntries, name):
 # You must call collectAllEntries() function before calling sum_()!
 # Collects activities that match 'searchStr' and prints summarized DH and CS.
 # For 'exactMatch' meaning, check documentation of getFilteredEntries() function.
-def sum_(searchStr, exactMatch):
-    filtered = getFilteredEntries(searchStr, exactMatch)
+def sum_(searchStr):
+    filtered = getFilteredEntries(searchStr)
     if len(filtered) == 0:
         print(f'Activity \'{searchStr}\' was not found!')
         return
@@ -77,7 +73,7 @@ def sum_(searchStr, exactMatch):
     print(_summarizeEntries(filtered, searchStr).getAsStr(1,1))
 
     # print detailed view
-    print('\n\nDetailed view:')
+    print('\nDetailed view:')
     for e in filtered:
         print(e.getAsStr(True, True))
 
@@ -110,7 +106,7 @@ def removeInactivePart(filePath):
 def removeTrailingTags(lines):
     for i in range(len(lines)):
         lines[i] = lines[i].replace(" (couldn't stop)", '')  # remove (couldn't stop) tag
-        lines[i] = re.sub(r'\s[\[\(][\w, ]*last one[\w, !?\]\)]*', '', lines[i],
+        lines[i] = re.sub(r'\s[\[(][\w, ]*last one[\w, !?\])]*', '', lines[i],
                           flags=re.IGNORECASE)  # remove [last one] tags
         lines[i] = lines[i].strip()  # remove \n
     return lines
@@ -136,3 +132,66 @@ def collectAllEntries(pathToDir):
             lines = removeInactivePart(txtFilePath)
             lines = removeTrailingTags(lines)
             addEntries(lines, Path(file).stem)
+
+
+def printHelp():
+    print('=============== command: list ===============\n'
+    'list <dir_path> [options]\n'
+    'list <dir_path> /<regex_sub_str>\n'
+    'Lists all entries in dir_path using specified options or show entries that only match regex_sub_str.\n'
+    'You can combine options to achieve the desired output.\n'
+    'Possible options:\n'
+    '    r - show entries in reverse order\n'
+    '    d - show total amount of dedicated hours\n'
+    '    c - show calendar span in days between first entry and last one\n'
+    '    sd - sort by amount of dedicated hours\n'
+    '    sc - sort by amount of calendar span\n'
+    '\n'
+    '    /<regex_sub_str> - show entries that only match the sub-string')
+
+    print('')
+    print('=============== command: sum ===============\n'
+    'sum <dir_path> <activity_regex_str>\n'
+    'Summarizes total number of dedicated hours for the specified activity_regex_str'
+    'in dir_path.\n')
+
+# Parses user arguments
+def parseCommand(argv):
+    args = getArgs(argv)
+    collectAllEntries(args.dirPath)  # must be executed before any command
+
+    if args.cmd == 'list':
+        if args.activityStr:
+            for e in getFilteredEntries(args.activityStr):
+                print(e.getAsStr(True, True))
+        else:
+            printAllEntries('r' in args.options, 'd' in args.options,
+                    'c' in args.options, 'sd' in args.options, 'sc' in args.options)
+    elif args.cmd == 'sum':
+        sum_(args.activityStr)
+    elif args.cmd == 'help':
+        printHelp()
+
+
+def getArgs(argv):
+    count = len(argv) -1  # -1 to ignore 0th argument, which is always the path of the script
+    result = Args()
+    if count == 0 or argv[1] in ('help','-h','/h','/?'):
+        result.cmd = 'help'
+        return result
+    if count >= 2:  # 1st argument is always the command, 2nd the dirPath
+        result.cmd = argv[1]
+        result.dirPath = argv[2]
+
+    if result.cmd == 'list':
+        if count == 3 and argv[3][0] == '/':
+            result.activityStr = argv[3][1:]
+        elif count >=3:
+            result.options = argv[3:]
+    elif result.cmd == 'sum':
+        result.activityStr = argv[3]
+    else:
+        print('Unsupported command. Exiting')
+        exit(1)
+        
+    return result
