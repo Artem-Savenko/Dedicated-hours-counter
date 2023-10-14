@@ -1,7 +1,7 @@
 > command =============== list ===============
-    dir_path list [options]
-    dir_path list /<regex_sub_str>
-    Lists all entries in dir_path using specified options or show entries that only match regex_sub_str.
+    list <dir_path> [options]
+    list <dir_path> /<regex_activity_str>
+    Lists all entries in dir_path using specified options or show entries that only match regex_activity_str.
     You can combine options to achieve the desired output.
     Possible options:
         r - show entries in reverse order
@@ -10,7 +10,7 @@
         sd - sort by amount of dedicated hours
         sc - sort by amount of calendar span
 
-        /<regex_sub_str> - show entries that only match the sub-string
+        /<regex_activity_str> - show entries that only match the sub-string
 
     Example input: list d c sc r
     Example output:
@@ -19,14 +19,11 @@
         [140h] {11 days} Learning Python
 
 
-> command =============== find ===============
-    dir_path sum activity [e | r]
-    Summarize total number of dedicated hours for the specified activity in dir_path.
-    Possible options:
-        e - the activity string must match entirely (case insensitive)
-        r - use RegEx
+> command =============== sum ===============
+    sum <dir_path> <regex_activity_str>
+    Summarize total number of dedicated hours for the specified regex_activity_str in dir_path.
 
-    Example input: find "Learn Python.*" r
+    Example input: sum "Learn Python.*"
     Example output:
         Summary for activity:
         [175h] {68 days} Learning Python.*
@@ -35,3 +32,14 @@
         [  5h] {15 days} Learning Python (Book #1)
         [140h] {11 days} Learning Python (Video tut.)
         [ 30h] { 3 days} Another learning Python
+
+> command =============== help / -h /? "" ===============
+    Just prints info about using the program written above
+
+All possible commands (number shows number of args):
+1  DHC.exe                     # just prints help
+2  DHC.exe help|/?|-h|/h       # just prints help
+2  DHC.exe list                # list with default options
+3  DHC.exe list /regex         # list with filter
+3+ DHC.exe list d c dc         # list with option(s)
+3  DHC.exe sum <activity>      # sum with default options
