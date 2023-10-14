@@ -1,9 +1,37 @@
-Usage:
-> "Dedicated hours counter.exe" folder_with_entries_path activity
-Example output: You dedicated 140 hours 25 minutes for Learning Python
+> command =============== list ===============
+    dir_path list [options]
+    dir_path list /<regex_sub_str>
+    Lists all entries in dir_path using specified options or show entries that only match regex_sub_str.
+    You can combine options to achieve the desired output.
+    Possible options:
+        r - show entries in reverse order
+        d - show total amount of dedicated hours
+        c - show calendar span in days between first entry and last one
+        sd - sort by amount of dedicated hours
+        sc - sort by amount of calendar span
 
-> "Dedicated hours counter.exe" list_all
-Example output:
-	Learning Python [140h 25m]
-	Creating game 15 [5h]
-	Working out [17h 40m]
+        /<regex_sub_str> - show entries that only match the sub-string
+
+    Example input: list d c sc r
+    Example output:
+        [ 17h] {32 days} Working out
+        [  5h] {15 days} Creating game 15
+        [140h] {11 days} Learning Python
+
+
+> command =============== find ===============
+    dir_path sum activity [e | r]
+    Summarize total number of dedicated hours for the specified activity in dir_path.
+    Possible options:
+        e - the activity string must match entirely (case insensitive)
+        r - use RegEx
+
+    Example input: find "Learn Python.*" r
+    Example output:
+        Summary for activity:
+        [175h] {68 days} Learning Python.*
+
+        Detailed view:
+        [  5h] {15 days} Learning Python (Book #1)
+        [140h] {11 days} Learning Python (Video tut.)
+        [ 30h] { 3 days} Another learning Python
