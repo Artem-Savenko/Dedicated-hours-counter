@@ -44,8 +44,17 @@ def getFilteredEntries(searchStr):
 # prints all entries with optional options
 def printAllEntries(reversed, showDedicatedHours, showCalendarSpan, sortByDH, sortByCS):
     sortedEntries = sortEntries(sortByDH, sortByCS, reversed)
-    for e in sortedEntries:
-        print(e.getAsStr(showDedicatedHours, showCalendarSpan))
+
+    # Imitate a pager (like git log)
+    lines = shutil.get_terminal_size().lines
+    output = ''
+    for i in range(len(sortedEntries)):
+        output += sortedEntries[i].getAsStr(showDedicatedHours, showCalendarSpan) + '\n'
+        if i and (i % lines == 0 or i == len(sortedEntries) -1):
+            print(output, end='')
+            if i != len(sortedEntries) -1:
+                input('*'*10 + ' press Enter to show next page ' + '*'*10)
+            output = ''
 
     print('\n' + '='*15 + ' Total amount of activities: ' + str(len(sortedEntries)) + ' ' + '='*15)
 
