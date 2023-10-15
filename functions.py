@@ -128,14 +128,17 @@ def extractEntry(string):
 def collectAllEntries(pathToDir):
     for dirPath, dirs, files in os.walk(pathToDir):
         for file in files:
-            txtFilePath = os.path.join(dirPath, file)
-            lines = removeInactivePart(txtFilePath)
-            lines = removeTrailingTags(lines)
-            addEntries(lines, Path(file).stem)
+            if file.endswith('.txt'):
+                txtFilePath = os.path.join(dirPath, file)
+                lines = removeInactivePart(txtFilePath)
+                lines = removeTrailingTags(lines)
+                addEntries(lines, Path(file).stem)
 
 
 def printHelp():
-    print('=============== command: list ===============\n'
+    print('Dedicated hours counter\n'
+          'v.1.0.0 released: 15.10.2023\n'
+    '=============== command: list ===============\n'
     'list <dir_path> [options]\n'
     'list <dir_path> /<regex_sub_str>\n'
     'Lists all entries in dir_path using specified options or show entries that only match regex_sub_str.\n'
